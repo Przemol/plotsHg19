@@ -276,6 +276,37 @@ plotAverage(
 dev.print(pdf, file='fa2a.pdf');
 ```
 
+## [Plot C](fca2.pdf) - H2A.Z, H3K27ac, H3K9ac and TATA
+```{r topbar1_alt2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='svg', fig.align='center', fig.height=2*4, fig.width=6*4, out.height='300', out.width="auto"}
+alt_tracks <- dir('alt_tracks', pattern = 'bw', full.names = TRUE)
+ms3 <- MotifSetup()
+ms3$addBigWig(alt_tracks[3])$addBigWig(alt_tracks[1])$addBigWig(tracks[1])$addBigWig(tracks[3]) -> m3
+ms3$addMotif('GC', revcomp = FALSE)  -> m3
+M3 <- getPlotSetArray(
+    tracks = ms3,
+    features = features[1],
+    refgenome = 'hg19',
+    bin = 10L, xmin = 1000L, xmax = 1500L
+)
+
+plotTopBar(M3, M3$as.array()  %>% colnames %>% strsplit('_') %>% sapply('[[', 1))
+dev.print(pdf, file='fca2.pdf');
+```
+
+
+
+## [Plot D](fda2.pdf) - H2A.Z, H3K27ac, H3K9ac and TATA
+```{r heatmap1_alt2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+cls <- plotHeatmap( 
+    unlist(M3)[c(1,3)], labels = colnames(M3$as.array())[c(1,3)]  %>% strsplit('_')  %>% sapply('[[', 1),
+    raster = TRUE, include = c(F,T,F,F), sortrows = 'decreasing', clusters = 3,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22
+    #o_min = c(-1, -2, -1, 8), #o_max = c(3, 8, 4, 16)
+)
+
+dev.print(pdf, file='fda2.pdf')
+```
+
 
 
 

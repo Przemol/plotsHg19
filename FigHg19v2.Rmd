@@ -1,0 +1,230 @@
+---
+title: "Proposed SeqPlots paper figures - *H. sapiens*"
+author: "Przemyslaw Stempor"
+date: "July 30, 2015"
+output:
+  ioslides_presentation:
+    fig_retina: null
+    smaller: yes
+    transition: 0
+widescreen: yes
+---
+
+
+<style>
+    .title-slide {
+        background-color: #CBE7A5; /* #EDE0CF; ; #CA9F9D*/
+    }
+    
+    slide {
+        background-color: #FFFFFF; /* #EDE0CF; ; #CA9F9D*/
+    }
+    article.smaller pre {
+        font-size: 12px;
+        line-height: 13px;
+        letter-spacing: 0;
+    }
+    
+    slides > slide > hgroup + article {
+        margin-top: 10px;
+    }
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+options("bitmapType" = "cairo")
+```
+
+## Data aquisition
+
+- Tracks comes from ENCODE project and were downloaded from GEO
+- For stronger signal replicates are combined using "bigWigMerge" tool
+- Combined tracks are z-scored using bash script with mean and sd calculated by "bigWigInfo" tool"
+
+Example of the data pre-processing;
+```{bash, eval=FALSE}
+bigWigMerge GSM803485_hg19_wgEncodeHaibTfbsGm12878Pol24h8Pcr1xRawRep2.bigWig \
+GSM803485_hg19_wgEncodeHaibTfbsGm12878Pol24h8Pcr1xRawRep1.bigWig \
+GSM803355_hg19_wgEncodeHaibTfbsGm12878Pol2Pcr2xRawRep2.bigWig \
+GSM803355_hg19_wgEncodeHaibTfbsGm12878Pol2Pcr2xRawRep1.bigWig merge.bedGraph
+
+bedGraphToBigWig merge.bedGraph hg19.chrom.sizes merge.bw
+
+mi=$(bigWigInfo merge.bw | grep mean | sed -n 's/mean: //pg')
+sd=$(bigWigInfo merge.bw | grep std | sed -n 's/std: //pg')
+cat merge.bedGraph | awk -v mi=$mi -v sd=$sd '{$4=($4-mi)/sd;print}' > zsc.bedGraph    
+bedGraphToBigWig zsc.bedGraph hg19.chrom.sizes Pol2_bigWigMerge_zsc.bw
+
+rm merge* zsc.bedGraph
+```
+
+
+## Data aquisition
+
+- Tracks comes from ENCODE project and were downloaded from GEO
+- For stronger signal replicates are combined using "bigWigMerge" tool
+- Combined tracks are z-scored using bash script with mean and sd calculated by "bigWigInfo" tool"
+
+Example of the data pre-processing;
+```{bash, eval=FALSE}
+bigWigMerge GSM803485_hg19_wgEncodeHaibTfbsGm12878Pol24h8Pcr1xRawRep2.bigWig \
+GSM803485_hg19_wgEncodeHaibTfbsGm12878Pol24h8Pcr1xRawRep1.bigWig \
+GSM803355_hg19_wgEncodeHaibTfbsGm12878Pol2Pcr2xRawRep2.bigWig \
+GSM803355_hg19_wgEncodeHaibTfbsGm12878Pol2Pcr2xRawRep1.bigWig merge.bedGraph
+
+bedGraphToBigWig merge.bedGraph hg19.chrom.sizes merge.bw
+
+mi=$(bigWigInfo merge.bw | grep mean | sed -n 's/mean: //pg')
+sd=$(bigWigInfo merge.bw | grep std | sed -n 's/std: //pg')
+cat merge.bedGraph | awk -v mi=$mi -v sd=$sd '{$4=($4-mi)/sd;print}' > zsc.bedGraph    
+bedGraphToBigWig zsc.bedGraph hg19.chrom.sizes Pol2_bigWigMerge_zsc.bw
+
+rm merge* zsc.bedGraph
+```
+
+## Loading data and libraries
+```{r aquire1, message=FALSE}
+require(seqplots)
+require(magrittr)
+set.seed(1)
+
+source('fn_plotTopBar.R'); plotTopBar <- plotTopBar
+devtools::load_all("/Users/przemol/code/seqplotsR")
+
+tracks <- dir('tracks', pattern = 'bw', full.names = TRUE)
+features <- dir('features', pattern = 'bed', full.names = TRUE)
+
+top_limits <- list(c(-0.25, .1), c(-0.3, 5), c(0, 14), c(0, 25))
+top_limits <- NULL
+colvec <- list(
+    NA, 
+    c('black', 'red', 'orange'), 
+    c('white', 'grey', 'black'),
+    c('white', '#66ccff', '#000066')
+)
+
+colvec2 <- list(
+    NA, 
+    c('black', 'red', 'orange'), 
+    c('darkgreen', 'yellow3', 'red'),
+    c('white', '#66ccff', '#000066')
+)
+
+tracks
+features
+```
+
+## Data process
+```{r aquire2, message=FALSE}
+m1 <- getPlotSetArray(
+    tracks = grep('H2A.Z|H3k4me3|H3K9ac', tracks, value = TRUE),
+    features = grep('band1', features, value = TRUE),
+    refgenome = 'hg19',
+    bin = 10L, xmin = 1500L, xmax = 3000L
+)
+
+m2 <- getPlotSetArray(
+    tracks = grep('H3K4me3', tracks, value = TRUE, ignore.case = TRUE),
+    features = grep('1|3|5', features, value = TRUE),
+    refgenome = 'hg19',
+    bin = 10L, xmin = 1500L, xmax = 3000L
+)
+#MotifSetup()$addMotif('CG', revcomp = FALSE) %>% 
+#    getPlotSetArray(features[1], refgenome = 'hg19', bin = 10L, xmin = 1500L, xmax = 3000L) -> clc
+
+ms <- MotifSetup()
+ms$addBigWig(tracks[1])$addBigWig(tracks[2])$addBigWig(tracks[3])$addBigWig(tracks[4])
+ms$addMotif('CG', revcomp = FALSE, name = "CpG")
+
+Ma <- getPlotSetArray(
+    tracks = ms,
+    features = features[1],
+    refgenome = 'hg19',
+    bin = 10L, xmin = 1000L, xmax = 1500L
+)
+
+for(i in 1:4) Ma$data[[1]][[i]]$heatmap[is.na(Ma$data[[1]][[i]]$heatmap)] <- 0
+Ma$data[[1]][[5]]$heatmap  %>% rowSums  %>% order(decreasing = TRUE) -> ord
+for(i in 1:5) Ma$data[[1]][[i]]$heatmap <- Ma$data[[1]][[i]]$heatmap[ord, ]
+
+
+```
+
+#Figures
+
+## [Plot A](fa2.pdf)
+
+```{r lineplot1, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='svg', fig.align='center', fig.height=8.27, fig.width=11.7, out.height=450, out.width="auto"}
+plotAverage(
+    m1, labels = colnames(m1$as.array())  %>% strsplit('_')  %>% sapply('[[', 1), 
+    legend_pos = 'topleft', legend_ext = TRUE, legend_ext_pos = 'topright',
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+    main = "Top expression quintile", xlab = "TSS", ylab = "Z-scored ChIP signal",
+    plotScale = "", #'zscore', 'log2'
+)
+
+dev.print(pdf, file='fa2.pdf'); dev.print(png, file='fa2.png', height=8.27, width=11.7, res=72, units = "in");
+```
+
+## [Plot B](fb2.pdf)
+
+```{r lineplot2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='svg', fig.align='center', fig.height=8.27, fig.width=11.7, out.height=450, out.width="auto"}
+plotAverage(
+    m2, labels = c("TSS_top_20%", "TSS_middle_20%", "TSS_bottom_20%"), 
+    legend_pos = 'topleft', legend_ext = TRUE, legend_ext_pos = 'topright',
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+    main = "Top expression quintile", xlab = "TSS", ylab = "Z-scored ChIP signal"
+)
+dev.print(pdf, file='fb2.pdf'); dev.print(png, file='fb2.png', height=8.27, width=11.7, res=72, units = "in");
+```
+
+## [Plot C](fc.pdf)
+```{r topbar1, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='svg', fig.align='center', fig.height=2*4, fig.width=6*4, out.height='300', out.width="auto", cache.rebuild=TRUE}
+source( 'fn_plotTopBar.R' ); plotTopBar <- plotTopBar
+M <- Ma[1,c(2,1,4,5)]
+plotTopBar(M, M$as.array()  %>% colnames %>% strsplit('_') %>% sapply('[[', 1), top_limits)
+dev.print(pdf, file='fc.pdf'); dev.print(png, file='fc.png', height=2*4, width=6*4, res=72, units = "in");
+```
+
+## [Plot D](fd.pdf)
+```{r heatmap1, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto", cache.rebuild=TRUE}
+set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+    raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22, colvec = colvec
+    #o_min = c(-1, -2, -1, 8), #o_max = c(3, 8, 4, 16)
+)
+dev.print(pdf, file='fd.pdf'); dev.print(png, file='fd.png', height=8.27, width=11.7, res=72, units = "in");
+```
+
+## [Plot E](fe.pdf)
+```{r topbar2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='svg', fig.align='center', fig.height=2*4, fig.width=6*4, out.height='300', out.width="auto", cache.rebuild=TRUE}
+export.bed(import.bed(features[1])[ord][cls$ClusterID==1], 'flt.bed')
+MFa <- getPlotSetArray(
+    tracks = ms,
+    features = 'flt.bed',
+    refgenome = 'hg19',
+    bin = 10L, xmin = 1000L, xmax = 1500L
+)
+for(i in 1:4) MFa$data[[1]][[i]]$heatmap[is.na(MFa$data[[1]][[i]]$heatmap)] <- 0
+MF <- MFa[1,c(2,1,3,5)]
+plotTopBar(MF, MF$as.array()  %>% colnames %>% strsplit('_') %>% sapply('[[', 1), top_limits)
+dev.print(pdf, file='fe.pdf'); dev.print(png, file='fe.png', height=2*4, width=6*4, res=72, units = "in");
+```
+
+## [Plot F](ff.pdf)
+```{r heatmap2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto", cache.rebuild=TRUEpub}
+set.seed(1); plotHeatmap(
+     MF, labels = MF$as.array()  %>% colnames %>% strsplit('_') %>% sapply('[[', 1),
+     raster = TRUE, include = c(F,T,T,T), sortrows = 'decreasing',
+     clstmethod = 'ssom', ssomt1 = 1, ssomt2 = 3,
+     cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22, colvec = colvec2,
+     o_min = c(0, 0, 0, 0), o_max = c(20, 20, 20, 30)
+)
+
+dev.print(pdf, file='ff.pdf'); dev.print(png, file='ff.png', height=8.27, width=11.7, res=72, units = "in");
+```
+
+## [Assembled figure (click for full page)](FigHg19L.html#/all) + [Printable - static HTML](static.html)
+<iframe src="FigHg19L.html#/all"></iframe>
