@@ -159,9 +159,9 @@ for(i in 1:5) Ma$data[[1]][[i]]$heatmap <- Ma$data[[1]][[i]]$heatmap[ord, ]
 plotAverage(
     m1, labels = colnames(m1$as.array())  %>% strsplit('_')  %>% sapply('[[', 1), 
     legend_pos = 'topleft', legend_ext = TRUE, legend_ext_pos = 'topright',
-    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22, colvec = c('darkred', 'darkblue', 'darkgreen'),
     main = "Top expression quintile", xlab = "TSS", ylab = "Z-scored ChIP signal",
-    plotScale = "", #'zscore', 'log2'
+    plotScale = ""#'zscore', 'log2',
 )
 
 dev.print(pdf, file='fa2.pdf'); dev.print(png, file='fa2.png', height=8.27, width=11.7, res=72, units = "in");
@@ -192,8 +192,8 @@ dev.print(pdf, file='fc.pdf'); dev.print(png, file='fc.png', height=2*4, width=6
 set.seed(1); cls <- plotHeatmap(
     M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
     raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
-    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22, colvec = colvec
-    o_min = c(0, 0, -0.25, 0), o_max = c(20, 20, 0.45, 30)
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22, colvec = colvec,
+    o_min = c(0, 0, -0.2, 0), o_max = c(20, 20, 0.4, 30)
 )
 dev.print(pdf, file='fd.pdf'); dev.print(png, file='fd.png', height=8.27, width=11.7, res=72, units = "in");
 ```
