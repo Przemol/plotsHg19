@@ -1,0 +1,165 @@
+---
+title: "Color palette tests for SeqPlots"
+author: "Przemyslaw Stempor"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  ioslides_presentation:
+    fig_retina: null
+    smaller: yes
+    transition: 0
+widescreen: yes
+---
+
+
+<style>
+    .title-slide {
+        background-color: #CBE7A5; /* #EDE0CF; ; #CA9F9D*/
+    }
+    
+    slide {
+        background-color: #FFFFFF; /* #EDE0CF; ; #CA9F9D*/
+    }
+    article.smaller pre {
+        font-size: 12px;
+        line-height: 13px;
+        letter-spacing: 0;
+    }
+    
+    slides > slide > hgroup + article {
+        margin-top: 10px;
+    }
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+options("bitmapType" = "cairo")
+require(RColorBrewer)
+ttl <- 'plot'
+```
+
+## ColorBrewer palettes
+```{r all_pal, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+display.brewer.all()
+```
+
+## ColorBrewer palettes div
+```{r div_pal, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+display.brewer.all(type = 'div')
+```
+
+## ColorBrewer palettes qual
+```{r qual_pal, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+display.brewer.all(type = 'qual')
+```
+
+## ColorBrewer palettes seq
+```{r seq_pal, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+display.brewer.all(type = 'seq')
+```
+
+```{r data, include=FALSE}
+require(seqplots)
+require(magrittr)
+set.seed(1)
+
+source('fn_plotTopBar.R'); plotTopBar <- plotTopBar
+devtools::load_all("/Users/przemol/code/seqplotsR")
+
+tracks <- dir('tracks', pattern = 'bw', full.names = TRUE)
+features <- dir('features', pattern = 'bed', full.names = TRUE)
+
+ms <- MotifSetup()
+ms$addBigWig(tracks[1])$addBigWig(tracks[2])$addBigWig(tracks[3])$addBigWig(tracks[4])
+ms$addMotif('CG', revcomp = FALSE, name = "CpG")
+
+Ma <- getPlotSetArray(
+    tracks = ms,
+    features = features[1],
+    refgenome = 'hg19',
+    bin = 10L, xmin = 1000L, xmax = 1500L
+)
+
+for(i in 1:4) Ma$data[[1]][[i]]$heatmap[is.na(Ma$data[[1]][[i]]$heatmap)] <- 0
+Ma$data[[1]][[5]]$heatmap  %>% rowSums  %>% order(decreasing = TRUE) -> ord
+for(i in 1:5) Ma$data[[1]][[i]]$heatmap <- Ma$data[[1]][[i]]$heatmap[ord, ]
+M <- Ma[1,c(2,1,4,5)]
+```
+
+## Current default palette
+```{r heatmap1, message=FALSE, paper = 'a4r', warning=FALSE, echo=FALSE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+    raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22
+)
+```
+
+# R palettes
+
+## "topo.colors" palette
+```{r message=FALSE, paper = 'a4r', warning=FALSE, echo=FALSE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+    raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+    clspace = topo.colors(11)
+)
+```
+
+## "terrain.colors" palette
+```{r message=FALSE, paper = 'a4r', warning=FALSE, echo=FALSE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+    raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+    clspace = terrain.colors(11)
+)
+```
+
+## "heat.colors" palette
+```{r message=FALSE, paper = 'a4r', warning=FALSE, echo=FALSE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+    raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+    cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+    clspace = heat.colors(11)
+)
+```
+
+# ColorBrewer palettes
+
+
+```{r echo=FALSE, results='asis', message=FALSE, message=FALSE, paper = 'a4r', warning=FALSE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+# knit the first three lines of first.Rmd
+pal <- RColorBrewer::brewer.pal.info
+for (i in 1:nrow(pal)) {
+    message(i, 'fdw')
+    cat('## Palette', rownames(pal[i,]), ', type=', as.character(pal[[i,2]]), '\n' )
+    set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+        raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+        cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+        clspace = RColorBrewer::brewer.pal(pal[i,1], rownames(pal[i,]))
+        #o_min = c(-1, -2, -1, 8), #o_max = c(3, 8, 4, 16)
+    )
+    cat('\n\n')
+}
+```
+
+```{r echo=FALSE, results='asis', message=FALSE, message=FALSE, paper = 'a4r', warning=FALSE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto"}
+# knit the first three lines of first.Rmd
+pal <- RColorBrewer::brewer.pal.info
+for (i in 1:nrow(pal)) {
+    message(i, 'rev')
+    cat('## Palette: reverced', rownames(pal[i,]), ', type=', as.character(pal[[i,2]]), '\n' )
+    set.seed(1); cls <- plotHeatmap(
+    M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
+        raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
+        cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
+        clspace = rev(RColorBrewer::brewer.pal(pal[i,1], rownames(pal[i,])))
+        #o_min = c(-1, -2, -1, 8), #o_max = c(3, 8, 4, 16)
+    )
+    cat('\n\n')
+}
+```

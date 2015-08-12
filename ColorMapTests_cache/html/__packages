@@ -1,0 +1,14 @@
+base
+RColorBrewer
+BiocGenerics
+magrittr
+seqplots
+S4Vectors
+IRanges
+GenomeInfoDb
+GenomicRanges
+XVector
+Biostrings
+rtracklayer
+BSgenome
+BSgenome.Hsapiens.UCSC.hg19

@@ -1,7 +1,7 @@
 ---
 title: "Proposed SeqPlots paper figures - *H. sapiens*"
 author: "Przemyslaw Stempor"
-date: "July 30, 2015"
+date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
   ioslides_presentation:
     fig_retina: null
@@ -98,16 +98,16 @@ features <- dir('features', pattern = 'bed', full.names = TRUE)
 top_limits <- list(c(-0.25, .1), c(-0.3, 5), c(0, 14), c(0, 25))
 top_limits <- NULL
 colvec <- list(
-    NA, 
-    c('black', 'red', 'orange'), 
-    c('white', 'grey', 'black'),
+    rev(RColorBrewer::brewer.pal(11, "RdYlBu")), #c('darkblue', 'white', 'darkred'),
+    c('white', 'darkred'),
+    rev(c('white', 'grey', 'black')),
     c('white', '#66ccff', '#000066')
 )
 
 colvec2 <- list(
-    NA, 
-    c('black', 'red', 'orange'), 
-    c('darkgreen', 'yellow3', 'red'),
+    rev(RColorBrewer::brewer.pal(11, "RdYlBu")), 
+    c('white', 'darkred'),
+    c('white', 'darkgreen'),
     c('white', '#66ccff', '#000066')
 )
 
@@ -126,7 +126,7 @@ m1 <- getPlotSetArray(
 
 m2 <- getPlotSetArray(
     tracks = grep('H3K4me3', tracks, value = TRUE, ignore.case = TRUE),
-    features = grep('1|3|5', features, value = TRUE),
+    features = grep('1|2|3|4|5', features, value = TRUE),
     refgenome = 'hg19',
     bin = 10L, xmin = 1500L, xmax = 3000L
 )
@@ -171,7 +171,7 @@ dev.print(pdf, file='fa2.pdf'); dev.print(png, file='fa2.png', height=8.27, widt
 
 ```{r lineplot2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='svg', fig.align='center', fig.height=8.27, fig.width=11.7, out.height=450, out.width="auto"}
 plotAverage(
-    m2, labels = c("TSS_top_20%", "TSS_middle_20%", "TSS_bottom_20%"), 
+    m2, labels = c("TSS top 20%", "TSS 2nd 20%", "TSS middle 20%",  "TSS 4th 20%","TSS bottom 20%"), 
     legend_pos = 'topleft', legend_ext = TRUE, legend_ext_pos = 'topright',
     cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22,
     main = "Top expression quintile", xlab = "TSS", ylab = "Z-scored ChIP signal"
@@ -193,7 +193,7 @@ set.seed(1); cls <- plotHeatmap(
     M, labels = colnames(M$as.array())  %>% strsplit('_')  %>% sapply('[[', 1),
     raster = TRUE, include = c(T,F,F,F), sortrows = 'no', clusters = 2,
     cex.legend = 18, cex.main = 36, cex.lab = 28, cex.axis = 22, colvec = colvec
-    #o_min = c(-1, -2, -1, 8), #o_max = c(3, 8, 4, 16)
+    o_min = c(0, 0, -0.25, 0), o_max = c(20, 20, 0.45, 30)
 )
 dev.print(pdf, file='fd.pdf'); dev.print(png, file='fd.png', height=8.27, width=11.7, res=72, units = "in");
 ```
@@ -214,7 +214,7 @@ dev.print(pdf, file='fe.pdf'); dev.print(png, file='fe.png', height=2*4, width=6
 ```
 
 ## [Plot F](ff.pdf)
-```{r heatmap2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto", cache.rebuild=TRUEpub}
+```{r heatmap2, message=FALSE, paper = 'a4r', warning=FALSE, echo=TRUE, dev='png', fig.align='center', fig.height=8.27, fig.width=11.7, out.height='450', out.width="auto", cache.rebuild=TRUE}
 set.seed(1); plotHeatmap(
      MF, labels = MF$as.array()  %>% colnames %>% strsplit('_') %>% sapply('[[', 1),
      raster = TRUE, include = c(F,T,T,T), sortrows = 'decreasing',
